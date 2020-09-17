@@ -322,5 +322,5 @@ int main(int argc, char *argv[]){
  }
  readFile(argv[1]);
  initScreen(0);
- decode(0xFFFFFFFF);
+ decode(0xFFFFFFFF); // For testing purposes
 }
