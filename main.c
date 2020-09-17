@@ -151,20 +151,135 @@ const int OPCODETABLE[128] = {
  /* 1111111 */ INVALID,
 };
 
-void decode(uint32_t instruction) {
- int8_t opcode = instruction & 0x7F;
+
+enum Instruction{
+Undefined,
+ADDI,
+SLTI,
+SLTIU,
+XORI,
+ORI,
+ANDI,
+SLLI,
+SRLI,
+SRAI,
+LUI,
+AUIPC,
+JAL,
+JALR,
+BEQ,
+BNE,
+BLT,
+BGE,
+BLTU,
+BGEU,
+LB,
+LH,
+LW,
+LBU,
+LHU,
+SB,
+SH,
+SW,
+ADD,
+SUB,
+SLL,
+SLT,
+SLTU,
+XOR,
+SRL,
+SRA,
+OR,
+AND,
+FENCE,
+ECALL,
+EBREAK
+};
+
+
+struct instruction_data {
+ uint8_t rd;
+ uint8_t rs1;
+ uint8_t rs2;
+ uint8_t imm_1;
+ uint8_t imm_2;
+ uint16_t m_imm;
+ int32_t l_imm;
+
+};
+
+struct INSTRUCTION{
+ uint8_t instruction;
+ struct instruction_data data;
+};
+
+typedef struct INSTRUCTION INSTRUCTION;
+
+
+struct INSTRUCTION decode(uint32_t instruction) {
+ uint8_t opcode = (instruction & 0x7F);
  if(opcode > 128){
-  return 0;
+  return;
  }
 
+ if(OPCODETABLE[opcode] == INVALID){
+  printf("instruction invalid");
+  return;
+ }
+ struct INSTRUCTION ret_inst;
+ if(OPCODETABLE[opcode] == I){
+  uint16_t imm = (instruction >> 20) & 0xFFF;
+  uint8_t rs1 = (instruction >> 15) & 0x1F;
+  uint8_t rd = (instruction >> 7) & 0x1F;
+  uint8_t funct3 = (instruction >> 12) & 0x07;
 
+  if(opcode == 0x13){
+   switch(funct3){
+    case 0:
+     /* ADDI */
+     ret_inst.instruction = ADDI;
+     ret_inst.data.rd = rd;
+     ret_inst.data.rs1 = rs1;
+     ret_inst.data.m_imm = imm;
+     break;
+    case 1:
+     /* SLTI */
+     ret_inst.instruction = SLTI;
+     ret_inst.data.rd = rd;
+     ret_inst.data.rs1 = rs1;
+     ret_inst.data.m_imm = imm;
+   }
+  }
+ }
+ if(OPCODETABLE[opcode] == R){
+  uint8_t rd = (instruction >> 7) & 0x1F;
+  uint8_t funct3 = (instruction >> 12) & 0x07;
+  uint8_t rs1 = (instruction >> 15) & 0x1F;
+  uint8_t rs2 = (instruction >> 20) & 0x1F;
+  uint8_t funct7 = (instruction >> 25) & 0x7F;
+ }
+ if(OPCODETABLE[opcode] == S){
+  uint8_t imm1 = (instruction >> 7) & 0x1F;
+  uint8_t imm2 = (instruction >> 25) & 0x7F;
+  uint8_t funct3 = (instruction >> 12) & 0x07;
+  uint8_t rs1 = (instruction >> 15) & 0x1F;
+  uint8_t rs2 = (instruction >> 20) & 0x1F;
+ }
+ if(OPCODETABLE[opcode] == B){
+
+ }
+ if(OPCODETABLE[opcode] == U){
+
+ }
+ if(OPCODETABLE[opcode] == J){
+
+ }
 }
 
 
 
 void initScreen(uint8_t state){
- //printf("%d\n", state);
- for(int i = 0; i < (SCREEN_OFFSET + SCREEN_SIZE); i++){
+ for(int i = 0; i < SCREEN_SIZE; i++){
   screen[i] = state;
  }
 }
@@ -184,11 +299,9 @@ void readFile(char *filePath){
   ret = fread(memory, 1, filesize, file);
   for(int i = 1; i <= diff; i++){
    memory[filesize + i] = 0; // Padding it out. Maybe change this later to NOP?
-   fclose(file);
   }
  } else{
   ret = fread(memory, 1, MEM_SIZE, file);
-  fclose(file);
  }
 }
 
@@ -209,4 +322,5 @@ int main(int argc, char *argv[]){
  }
  readFile(argv[1]);
  initScreen(0);
+ decode(0xFFFFFFFF);
 }
