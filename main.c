@@ -216,7 +216,7 @@ struct INSTRUCTION{
 typedef struct INSTRUCTION INSTRUCTION;
 
 
-struct INSTRUCTION decode(uint32_t instruction) {
+INSTRUCTION decode(uint32_t instruction) {
  uint8_t opcode = (instruction & 0x7F);
  if(opcode > 128){
   return;
@@ -242,7 +242,7 @@ struct INSTRUCTION decode(uint32_t instruction) {
      ret_inst.data.rs1 = rs1;
      ret_inst.data.m_imm = imm;
      break;
-    case 1:
+    case 2:
      /* SLTI */
      ret_inst.instruction = SLTI;
      ret_inst.data.rd = rd;
@@ -274,6 +274,7 @@ struct INSTRUCTION decode(uint32_t instruction) {
  if(OPCODETABLE[opcode] == J){
 
  }
+ return ret_inst;
 }
 
 
@@ -322,5 +323,7 @@ int main(int argc, char *argv[]){
  }
  readFile(argv[1]);
  initScreen(0);
- decode(0xFFFFFFFF); // For testing purposes
+ INSTRUCTION inst = decode(0x2013); // For testing purposes
+ printf("Instruction: %d", inst.instruction); // For testing purposes
+ printf("SLTI: %d", SLTI); // For testing purposes
 }
